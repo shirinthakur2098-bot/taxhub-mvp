@@ -1,31 +1,119 @@
 ---
-title: Abgabenordnung §§ 137, 138 – Anzeigepflichten bei Gründung (starter note)
+title: Abgabenordnung §§ 137, 138 – Anzeigepflichten bei Gründung
 source_type: public
 synthetic: false
-status: starter-note
-publisher: Bundesministerium der Justiz – gesetze-im-internet.de
+status: verified-official-source
+publisher: Bundesministerium der Justiz / Bundesamt für Justiz – Gesetze im Internet
 url: https://www.gesetze-im-internet.de/ao_1977/__138.html
+accessed: 2026-09-23
 ---
 
 # Abgabenordnung (AO) – Anzeigepflichten bei Gründung
 
-> **STARTER NOTE.** Paraphrased summary prepared for the TaxHub demo, pointing to the official statute. Replace or supplement with the official text from gesetze-im-internet.de (§ 137 AO: https://www.gesetze-im-internet.de/ao_1977/__137.html, § 138 AO: https://www.gesetze-im-internet.de/ao_1977/__138.html) before relying on it.
+## Source status
 
-## § 137 AO – Steuerpflichtige, die nicht natürliche Personen sind
+This knowledge note is based on the official text of §§ 137 and 138 of the German Fiscal Code (Abgabenordnung, AO), together with official ELSTER guidance for the tax-registration questionnaire used when founding a Kapitalgesellschaft such as a GmbH.
 
-Körperschaften, Vereinigungen und Vermögensmassen (this includes a GmbH) must notify the Finanzamt and the Gemeinde of circumstances relevant to their tax registration, in particular their founding (Gründung), acquisition of legal capacity, change of legal form, relocation of management or registered office, and dissolution.
+Official sources:
 
-The notification must be made **within one month** of the reportable event (§ 137 Abs. 2 AO).
+§ 137 AO:
+https://www.gesetze-im-internet.de/ao_1977/__137.html
 
-## § 138 AO – Anzeigen über die Erwerbstätigkeit
+§ 138 AO:
+https://www.gesetze-im-internet.de/ao_1977/__138.html
 
-Anyone who opens a business (Betrieb der Land- und Forstwirtschaft, gewerblicher Betrieb or Betriebsstätte) must notify the Gemeinde; a person starting a freelance activity notifies the Finanzamt.
+ELSTER – Fragebogen zur steuerlichen Erfassung for a Kapitalgesellschaft:
+https://www.elster.de/eportal/formulare-leistungen/alleformulare/fsekapg
 
-§ 138 Abs. 1b AO: When starting a business activity, taxpayers must provide the Finanzamt with further information on the tax-relevant circumstances using the **"Fragebogen zur steuerlichen Erfassung"**. This questionnaire must be transmitted **electronically** using the officially prescribed data record via the official interface (in practice: ELSTER).
+ELSTER help:
+https://www.elster.de/eportal/helpGlobal?themaGlobal=help_fsekapg_202501
 
-§ 138 Abs. 4 AO: Notifications must be made **within one month** of the reportable event.
+## § 137 AO – Tax-relevant changes concerning legal entities
 
-## Practical relevance for a new GmbH
+§ 137 AO requires legal entities, associations and pools of assets to notify the responsible Finanzamt of circumstances that are relevant for their tax registration.
 
-- The Fragebogen zur steuerlichen Erfassung for a Kapitalgesellschaft is submitted electronically via ELSTER.
-- The statutory period is one month after the reportable event. Which event starts the clock in a given case (e.g. notarisation vs. start of business activity) is a question for a tax adviser.
+Relevant events include, among other things:
+
+- acquisition of legal capacity
+- change of legal form
+- relocation of management
+- relocation of registered office
+- dissolution
+
+These notifications are relevant to entities such as a GmbH.
+
+## § 138 AO – Notification of business activity
+
+§ 138 AO governs notification obligations connected with beginning business activity.
+
+For a newly opened business, the responsible Finanzamt must generally be informed about the relevant tax circumstances.
+
+Under § 138 Abs. 1b AO, the taxpayer must provide the Finanzamt with further information needed for tax registration.
+
+In practice, for a newly founded Kapitalgesellschaft such as a GmbH, this is done using the:
+
+“Fragebogen zur steuerlichen Erfassung: Gründung einer Kapitalgesellschaft bzw. Genossenschaft”.
+
+## Electronic submission
+
+The tax-registration questionnaire must generally be transmitted electronically using the officially prescribed interface, for example through Mein ELSTER.
+
+Paper submission is permitted only in exceptional hardship cases.
+
+## One-month deadline
+
+Official ELSTER guidance states that when a business is opened, the responsible Finanzamt must generally be notified within one month.
+
+ELSTER refers to § 138 Abs. 1b and § 138 Abs. 4 AO as the legal basis for this requirement.
+
+For TaxHub, this deadline is relevant when a client says that a GmbH was recently founded but that no tax-registration questionnaire has yet been submitted.
+
+## Relevance to a newly founded GmbH
+
+If a client says:
+
+“I founded a GmbH three weeks ago and we have not submitted anything to the Finanzamt yet,”
+
+TaxHub should:
+
+1. identify the possible tax-registration issue,
+2. ask when the business activity began,
+3. ask whether the Fragebogen zur steuerlichen Erfassung has already been submitted,
+4. record whether a Steuernummer has already been issued,
+5. collect the information needed for adviser review,
+6. avoid making a final legal or tax determination,
+7. escalate the case to a qualified tax adviser where professional judgment is required.
+
+## TaxHub use
+
+This source can support intake questions such as:
+
+- When did the company begin business activity?
+- Has the Finanzamt already been notified?
+- Has the Fragebogen zur steuerlichen Erfassung already been submitted?
+- Was it submitted electronically through ELSTER or another approved interface?
+- Has the company already received a Steuernummer?
+- Has the company changed its registered office, management or legal form?
+- Is there anything unusual about the formation or filing situation that should be reviewed by a tax adviser?
+
+## Guardrail
+
+TaxHub uses §§ 137 and 138 AO only to support intake, issue identification and case preparation.
+
+The system should not independently determine whether a client has fully complied with German tax law, whether a filing obligation has been triggered in a specific borderline case, or whether an exception applies.
+
+Any such determination should be escalated to a qualified tax adviser.
+
+## Official references
+
+§ 137 AO:
+https://www.gesetze-im-internet.de/ao_1977/__137.html
+
+§ 138 AO:
+https://www.gesetze-im-internet.de/ao_1977/__138.html
+
+ELSTER – GmbH / Kapitalgesellschaft tax-registration questionnaire:
+https://www.elster.de/eportal/formulare-leistungen/alleformulare/fsekapg
+
+ELSTER help:
+https://www.elster.de/eportal/helpGlobal?themaGlobal=help_fsekapg_202501
