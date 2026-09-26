@@ -98,7 +98,8 @@ a { color: var(--brand); }
   margin: auto; max-width: 420px; text-align: center; color: var(--muted);
 }
 .empty-chat h2 { color: var(--text); font-size: 18px; margin: 0 0 6px; }
-.empty-chat .btn { margin-top: 14px; }
+.empty-actions { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
+.offline-banner { font-size: 12.5px; color: var(--warn); background: var(--warn-bg); border-bottom: 1px solid #f5d3a8; padding: 6px 20px; }
 .msg { display: flex; gap: 10px; max-width: 92%; }
 .msg-user { align-self: flex-end; flex-direction: row-reverse; }
 .avatar {
@@ -126,10 +127,13 @@ a { color: var(--brand); }
 
 .sources { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
 .source-row { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; }
-.source-row.active { background: #fbfaf2; border-radius: 6px; }
+.source-row { padding: 2px 0; }
 .source-body { flex: 1; min-width: 0; }
 .source-title { font-weight: 600; }
 .source-excerpt { color: var(--muted); font-size: 12px; margin-top: 3px; white-space: pre-wrap; border-left: 2px solid var(--border); padding-left: 8px; }
+.source-link { font-weight: 500; font-size: 12px; margin-left: 6px; text-decoration: none; white-space: nowrap; }
+.source-link:hover { text-decoration: underline; }
+.source-row .cite { flex: none; min-width: 18px; text-align: center; }
 .source-toggle { font-size: 12px; color: var(--muted); background: none; border: none; padding: 0; text-decoration: underline; }
 
 .badge {
@@ -139,7 +143,6 @@ a { color: var(--brand); }
 .badge-public { color: var(--public); background: var(--public-bg); }
 .badge-firm { color: var(--firm); background: var(--firm-bg); }
 .badge-synthetic { color: var(--synthetic); background: var(--synthetic-bg); }
-.badge-starter { color: var(--muted); background: #fff; border-color: var(--border-strong); }
 .badge-ok { color: var(--ok); background: var(--ok-bg); }
 .badge-warn { color: var(--warn); background: var(--warn-bg); }
 .badge-danger { color: var(--danger); background: var(--danger-bg); }

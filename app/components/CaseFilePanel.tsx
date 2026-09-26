@@ -1,7 +1,7 @@
 "use client";
 
 import type { CaseFile, Citation } from "@/lib/types";
-import { SourceBadges } from "./SourceBadges";
+import { SourceBadges, hostOf } from "./SourceBadges";
 
 const MASTER_FIELDS: { key: keyof CaseFile; label: string; wide?: boolean }[] = [
   { key: "companyName", label: "Client / company" },
@@ -152,10 +152,13 @@ export function CaseFilePanel(props: {
               <ul className="checklist">
                 {props.sources.map((s) => (
                   <li key={s.docId} style={{ flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 600 }}>
-                      {s.url ? <a href={s.url} target="_blank" rel="noreferrer">{s.title}</a> : s.title}
-                    </span>
+                    <span style={{ fontWeight: 600 }}>{s.title}</span>
                     <SourceBadges source={s} />
+                    {s.url && (
+                      <a className="source-link" href={s.url} target="_blank" rel="noreferrer">
+                        {hostOf(s.url)} ↗
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -168,7 +171,7 @@ export function CaseFilePanel(props: {
         <span className="hint">Adviser handover</span>
         <span className="spacer" />
         <button className="btn btn-primary" onClick={props.onSummary} disabled={!props.canSummarise || props.summaryBusy}>
-          {props.summaryBusy ? "Generating…" : "Generate adviser summary & client email"}
+          {props.summaryBusy ? "Preparing handover…" : "Create adviser handover & client email"}
         </button>
       </div>
     </section>

@@ -5,7 +5,6 @@ export interface SourceMeta {
   title: string;
   sourceType: SourceType;
   synthetic: boolean;
-  starterNote: boolean;
   publisher?: string;
   url?: string;
   path: string; // relative to /knowledge
@@ -78,7 +77,6 @@ export interface Citation {
   title: string;
   sourceType: SourceType;
   synthetic: boolean;
-  starterNote: boolean;
   url?: string;
   heading: string;
   excerpt: string;

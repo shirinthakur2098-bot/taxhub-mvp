@@ -9,9 +9,15 @@ import {
 } from "./prompts";
 import { type CaseFile, type ChatMessage, type Citation, EMPTY_CASE, type Passage, type UploadedDoc } from "./types";
 
+// claude-opus-5 is a current production model ID on the Claude API.
 export const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-5";
-const EFFORT = (process.env.TAXHUB_EFFORT || "medium") as "low" | "medium" | "high";
-const FALLBACKS_ON = process.env.TAXHUB_DISABLE_FALLBACKS !== "true";
+type Effort = "low" | "medium" | "high";
+const EFFORT_OVERRIDE = process.env.TAXHUB_EFFORT as Effort | undefined;
+// Intake turns are short extraction + questions, so they default to low effort to keep
+// the chat responsive; the one-off handover summary gets a bit more thinking.
+const INTAKE_EFFORT: Effort = EFFORT_OVERRIDE || "low";
+const SUMMARY_EFFORT: Effort = EFFORT_OVERRIDE || "medium";
+let fallbacksOn = process.env.TAXHUB_DISABLE_FALLBACKS !== "true";
 
 export function hasApiKey(): boolean {
   return Boolean(process.env.ANTHROPIC_API_KEY);
@@ -25,19 +31,43 @@ function getClient() {
 
 export class RefusalError extends Error {}
 
-async function callJson<T>(system: string, messages: Anthropic.Beta.BetaMessageParam[], schema: object): Promise<T> {
-  const response = await getClient().beta.messages.create({
+async function createMessage(
+  system: string,
+  messages: Anthropic.Beta.BetaMessageParam[],
+  schema: object,
+  effort: Effort,
+  withFallbacks: boolean,
+) {
+  return getClient().beta.messages.create({
     model: MODEL,
     max_tokens: 16000,
     thinking: { type: "adaptive" },
-    output_config: { effort: EFFORT, format: { type: "json_schema", schema: schema as Record<string, unknown> } },
+    output_config: { effort, format: { type: "json_schema", schema: schema as Record<string, unknown> } },
     // Stable system prompt is cached; per-turn context lives in the last user message.
     system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
     messages,
     // Server-side refusal fallback (beta): if the primary model declines, the API
     // re-runs the request on Anthropic's recommended fallback model.
-    ...(FALLBACKS_ON ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const } : {}),
+    ...(withFallbacks ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const } : {}),
   });
+}
+
+async function callJson<T>(system: string, messages: Anthropic.Beta.BetaMessageParam[], schema: object, effort: Effort): Promise<T> {
+  let response;
+  try {
+    response = await createMessage(system, messages, schema, effort, fallbacksOn);
+  } catch (err) {
+    // The fallback parameter is a beta. If this account or model rejects it, retry
+    // without it rather than failing the client's turn. If the retry succeeds,
+    // skip the beta for the rest of this server instance's life.
+    if (fallbacksOn && err instanceof Anthropic.BadRequestError) {
+      response = await createMessage(system, messages, schema, effort, false);
+      fallbacksOn = false;
+      console.warn("[taxhub] Refusal-fallback beta rejected; continuing without it:", err.message);
+    } else {
+      throw err;
+    }
+  }
 
   if (response.stop_reason === "refusal") {
     throw new RefusalError("The model declined this request. Please rephrase, or contact an adviser directly.");
@@ -50,6 +80,23 @@ async function callJson<T>(system: string, messages: Anthropic.Beta.BetaMessageP
     .map((b) => b.text)
     .join("");
   return JSON.parse(text) as T;
+}
+
+/**
+ * The model cites whichever passage refs it used (e.g. S2, S5, S7). Renumber them
+ * S1..Sn in order of first appearance so the client sees 1, 2, 3.
+ */
+export function renumberCitations(text: string, citations: Citation[]): { text: string; citations: Citation[] } {
+  const order: string[] = [];
+  for (const m of text.matchAll(/\[(S\d+)\]/g)) if (!order.includes(m[1])) order.push(m[1]);
+  for (const c of citations) if (!order.includes(c.ref)) order.push(c.ref);
+  const map = new Map(order.map((ref, i) => [ref, `S${i + 1}`]));
+  return {
+    text: text.replace(/\[(S\d+)\]/g, (m, ref) => (map.has(ref) ? `[${map.get(ref)}]` : m)),
+    citations: citations
+      .map((c) => ({ ...c, ref: map.get(c.ref) ?? c.ref }))
+      .sort((a, b) => Number(a.ref.slice(1)) - Number(b.ref.slice(1))),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -66,11 +113,22 @@ export function toCitations(passages: Passage[], refs: string[], alsoFromText = 
       title: p.title,
       sourceType: p.sourceType,
       synthetic: p.synthetic,
-      starterNote: p.starterNote,
       url: p.url,
       heading: p.heading,
-      excerpt: p.text.length > 420 ? p.text.slice(0, 420).trimEnd() + "…" : p.text,
+      excerpt: readableExcerpt(p.text),
     }));
+}
+
+/** Turn a markdown chunk into a short, readable excerpt (tables → "a · b · c" lines). */
+function readableExcerpt(text: string): string {
+  const clean = text
+    .split("\n")
+    .filter((l) => !/^\s*\|?\s*:?-{3,}/.test(l))
+    .map((l) => l.replace(/^\s*\|\s*|\s*\|\s*$/g, "").replace(/\s*\|\s*/g, " · ").replace(/\*\*/g, ""))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return clean.length > 420 ? clean.slice(0, 420).trimEnd() + "…" : clean;
 }
 
 /** Drop [S#] markers that don't correspond to a passage we actually supplied. */
@@ -115,15 +173,17 @@ export async function runIntakeTurn(opts: {
     citedRefs: string[];
     escalate: boolean;
     caseFile: CaseFile;
-  }>(INTAKE_SYSTEM_PROMPT, messages, INTAKE_OUTPUT_SCHEMA);
+  }>(INTAKE_SYSTEM_PROMPT, messages, INTAKE_OUTPUT_SCHEMA, INTAKE_EFFORT);
 
-  const reply = stripUnknownRefs(out.reply, opts.passages);
+  const stripped = stripUnknownRefs(out.reply, opts.passages);
+  // Only list sources the reply actually cites inline, numbered 1..n.
+  const { text: reply, citations } = renumberCitations(stripped, toCitations(opts.passages, [], stripped));
   return {
     reply,
     grounding: out.grounding,
     escalate: Boolean(out.escalate),
     caseFile: sanitiseCase(out.caseFile, opts.caseFile),
-    citations: toCitations(opts.passages, out.citedRefs ?? [], reply),
+    citations,
   };
 }
 
@@ -138,6 +198,7 @@ export async function runSummary(opts: {
     SUMMARY_SYSTEM_PROMPT,
     [{ role: "user", content: buildSummaryTurn(opts) }],
     SUMMARY_OUTPUT_SCHEMA,
+    SUMMARY_EFFORT,
   );
   const briefing = stripUnknownRefs(out.adviserBriefing, opts.passages);
   const nextActions = out.nextActions.map((a) => stripUnknownRefs(a, opts.passages));

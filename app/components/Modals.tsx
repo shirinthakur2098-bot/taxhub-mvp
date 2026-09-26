@@ -24,7 +24,7 @@ export function SummaryModal({ data, caseId, onClose }: { data: SummaryResponse;
         <div className="modal-head">
           <h3>Adviser handover · {caseId}</h3>
           <div className="tabs" style={{ marginLeft: 12 }}>
-            <button className={`tab ${tab === "summary" ? "active" : ""}`} onClick={() => setTab("summary")}>Case summary</button>
+            <button className={`tab ${tab === "summary" ? "active" : ""}`} onClick={() => setTab("summary")}>Adviser handover</button>
             <button className={`tab ${tab === "email" ? "active" : ""}`} onClick={() => setTab("email")}>Draft client email</button>
           </div>
           <span className="spacer" />
@@ -40,7 +40,7 @@ export function SummaryModal({ data, caseId, onClose }: { data: SummaryResponse;
           <pre className={`doc-pre ${tab === "email" ? "doc-email" : ""}`}>{text}</pre>
         </div>
         <div className="modal-foot">
-          <span className="hint" style={{ marginRight: "auto" }}>Paste into DATEV DMS, your ticket system, or an email.</span>
+          <span className="hint" style={{ marginRight: "auto" }}>Plain text – paste into DATEV DMS, a ticket, or an internal email.</span>
           <button
             className="btn"
             onClick={async () => {
@@ -123,7 +123,7 @@ export function KnowledgeModal({ onClose }: { onClose: () => void }) {
                     <span className="spacer" />
                     <span className="badge badge-neutral">BM25 {h.score}</span>
                   </div>
-                  <div className="kb-path">{h.chunkId} · {h.heading}</div>
+                  <div className="kb-path">{h.heading}</div>
                   <div className="source-excerpt" style={{ marginTop: 6 }}>{h.text.slice(0, 500)}{h.text.length > 500 ? "…" : ""}</div>
                 </div>
               ))}

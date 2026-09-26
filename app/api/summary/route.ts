@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
-  let body: { caseFile?: CaseFile; messages?: ChatMessage[]; uploads?: UploadedDoc[]; sourcesUsed?: Citation[] };
+  let body: { caseId?: string; caseFile?: CaseFile; messages?: ChatMessage[]; uploads?: UploadedDoc[]; sourcesUsed?: Citation[] };
   try {
     body = await req.json();
   } catch {
@@ -20,6 +20,7 @@ export async function POST(req: Request) {
   const messages = body.messages ?? [];
   const uploads = body.uploads ?? [];
   const sourcesUsed = body.sourcesUsed ?? [];
+  const caseId = String(body.caseId ?? "TH-DRAFT").slice(0, 40);
 
   if (!hasApiKey()) {
     if (caseFile.companyName !== "Nordlicht Digital GmbH") {
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    return NextResponse.json(await offlineSummary(caseFile, uploads, sourcesUsed));
+    return NextResponse.json(await offlineSummary(caseId, caseFile, uploads, sourcesUsed));
   }
 
   const query = [
@@ -48,11 +49,11 @@ export async function POST(req: Request) {
     const out = await runSummary({ caseFile, uploads, passages, messages, today: new Date().toISOString().slice(0, 10) });
     const response: SummaryResponse = {
       summary: composeSummary({
+        caseId,
         caseFile,
         uploads,
         briefing: out.adviserBriefing,
         nextActions: out.nextActions,
-        email: out.email,
         sources: sourcesUsed,
         briefingCitations: out.citations,
         generatedAt: new Date().toISOString().slice(0, 16).replace("T", " "),

@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { ChatMessage, Citation, UploadedDoc } from "@/lib/types";
-import { SourceBadges } from "./SourceBadges";
+import { SourceList, refNum } from "./SourceBadges";
 
 export const DOC_TYPES = [
   "Articles of association (Gesellschaftsvertrag / notarielle Urkunde)",
@@ -40,22 +40,17 @@ export function guessDocType(name: string): string {
 
 function MessageText({ text, citations, onCite }: { text: string; citations?: Citation[]; onCite: (ref: string) => void }) {
   const byRef = new Map((citations ?? []).map((c) => [c.ref, c]));
-  const parts = text.split(/(\[S\d+\])/g);
+  const parts = text.split(/(\s?\[S\d+\])/g);
   return (
     <>
       {parts.map((p, i) => {
-        const m = p.match(/^\[(S\d+)\]$/);
+        const m = p.match(/^\s?\[(S\d+)\]$/);
         if (!m) return <Fragment key={i}>{p}</Fragment>;
         const c = byRef.get(m[1]);
         if (!c) return null;
         return (
-          <button
-            key={i}
-            className={`cite cite-${c.sourceType}`}
-            title={`${c.title} – ${c.heading}`}
-            onClick={() => onCite(m[1])}
-          >
-            {m[1]}
+          <button key={i} className={`cite cite-${c.sourceType}`} title={c.title} onClick={() => onCite(m[1])}>
+            {refNum(m[1])}
           </button>
         );
       })}
@@ -64,7 +59,6 @@ function MessageText({ text, citations, onCite }: { text: string; citations?: Ci
 }
 
 function AssistantMessage({ msg }: { msg: ChatMessage }) {
-  const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const citations = msg.citations ?? [];
 
@@ -72,51 +66,14 @@ function AssistantMessage({ msg }: { msg: ChatMessage }) {
     <div className="msg msg-assistant">
       <div className="avatar">TH</div>
       <div className="bubble">
-        <MessageText
-          text={msg.content}
-          citations={citations}
-          onCite={(ref) => {
-            setOpen(true);
-            setActive(ref);
-          }}
-        />
+        <MessageText text={msg.content} citations={citations} onCite={(ref) => setActive(active === ref ? null : ref)} />
         <div className="msg-meta">
           {msg.grounding === "grounded" && <span className="badge badge-ok">✓ Grounded in cited sources</span>}
           {msg.grounding === "workflow" && <span className="badge badge-neutral">Firm workflow · no tax facts</span>}
           {msg.grounding === "not_in_kb" && <span className="badge badge-warn">Not covered by knowledge base</span>}
           {msg.escalate && <span className="badge badge-danger">⚑ Flagged for human adviser</span>}
-          {citations.length > 0 && (
-            <button className="source-toggle" onClick={() => setOpen((o) => !o)}>
-              {open ? "Hide" : "Show"} {citations.length} source{citations.length > 1 ? "s" : ""}
-            </button>
-          )}
         </div>
-        {open && citations.length > 0 && (
-          <div className="sources">
-            {citations.map((c) => (
-              <div key={c.ref} className={`source-row ${active === c.ref ? "active" : ""}`}>
-                <span className={`cite cite-${c.sourceType}`}>{c.ref}</span>
-                <div className="source-body">
-                  <div className="source-title">
-                    {c.url ? (
-                      <a href={c.url} target="_blank" rel="noreferrer">
-                        {c.title}
-                      </a>
-                    ) : (
-                      c.title
-                    )}{" "}
-                    <SourceBadges source={c} />
-                  </div>
-                  <div className="source-excerpt">
-                    <strong>{c.heading}</strong>
-                    {"\n"}
-                    {c.excerpt}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {citations.length > 0 && <SourceList citations={citations} active={active} onSelect={setActive} />}
       </div>
     </div>
   );
@@ -132,8 +89,8 @@ export function Chat(props: {
   setPending: (docs: UploadedDoc[]) => void;
   onSend: () => void;
   onPlayDemo: () => void;
+  onInsertSample: () => void;
   demoRunning: boolean;
-  offline: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState(false);
@@ -163,10 +120,15 @@ export function Chat(props: {
               Tell us about your situation in your own words. Our assistant will ask what&apos;s missing, request the right documents and
               prepare your case for an adviser.
             </p>
-            <button className="btn btn-primary" onClick={props.onPlayDemo} disabled={props.demoRunning}>
-              ▶ Play the new-GmbH demo
-            </button>
-            {props.offline && <p className="hint" style={{ marginTop: 12 }}>Offline demo mode: scripted replies, real retrieval.</p>}
+            <div className="empty-actions">
+              <button className="btn btn-primary" onClick={props.onPlayDemo} disabled={props.demoRunning}>
+                ▶ Run sample case
+              </button>
+              <button className="btn" onClick={props.onInsertSample} disabled={props.demoRunning}>
+                Insert sample message
+              </button>
+            </div>
+            <p className="hint" style={{ marginTop: 10 }}>Sample: a founder with a three-week-old GmbH, Lexoffice and two new employees.</p>
           </div>
         )}
 
@@ -273,7 +235,7 @@ export function Chat(props: {
           </button>
         </div>
         <div className="composer-hint">
-          Demo: files stay in your browser – only file names and document types are shared with the assistant. Not tax advice; an adviser reviews every case.
+          Files stay in your browser – only file names and document types are shared with the assistant. Not tax advice; an adviser reviews every case.
         </div>
       </div>
     </section>

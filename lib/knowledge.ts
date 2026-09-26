@@ -90,7 +90,6 @@ function buildMeta(rel: string, meta: Record<string, string>): SourceMeta {
     title: meta.title || path.basename(rel).replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "),
     sourceType,
     synthetic: meta.synthetic === "true",
-    starterNote: meta.status === "starter-note",
     publisher: meta.publisher || undefined,
     url: meta.url || undefined,
     path: rel,

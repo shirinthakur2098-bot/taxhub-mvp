@@ -42,7 +42,11 @@ const base: CaseFile = {
   legalForm: "GmbH",
   incorporationDate: "approx. 2026-09-02 (client: \"three weeks ago\")",
   registeredOffice: null,
-  requestedServices: ["Bookkeeping (Finanzbuchhaltung)", "Payroll (Lohnbuchhaltung)", "Tax registration (Fragebogen zur steuerlichen Erfassung)"],
+  requestedServices: [
+    "Bookkeeping (Finanzbuchhaltung)",
+    "Payroll & social-security setup (Lohnbuchhaltung)",
+    "Tax registration (Fragebogen zur steuerlichen Erfassung)",
+  ],
   employees: "2 – starting next month (approx. October 2026)",
   payrollRequirements: "2 employees from next month; employment types, salaries and Betriebsnummer status unknown",
   bookkeepingSoftware: "Lexoffice",
@@ -62,7 +66,7 @@ const base: CaseFile = {
   caseCategory: "NG-01 New GmbH – formation support · tags: BK, PR",
   priority: "high",
   priorityReason: "Company founded ~3 weeks ago and the Fragebogen zur steuerlichen Erfassung has not been submitted (SOP escalation rule).",
-  escalations: ["Fragebogen not submitted and company founded ~3 weeks ago – adviser to confirm the statutory deadline"],
+  escalations: ["Fragebogen not submitted and company founded ~3 weeks ago – adviser to confirm timing"],
   recommendedNextAction:
     "Complete company master data, then have an adviser confirm the registration deadline and prepare the Fragebogen zur steuerlichen Erfassung via ELSTER.",
 };
@@ -134,9 +138,9 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    reply: `Thank you – that gives me a clear picture. I've opened a case for a newly founded GmbH that needs bookkeeping and payroll support {{sop|case categories new GmbH bookkeeping payroll}}.
+    reply: `Thank you – that already gives me a clear picture. I've opened a case for your newly founded GmbH covering bookkeeping, payroll and the tax registration {{sop|case categories new GmbH bookkeeping payroll}}.
 
-One point to flag straight away: a GmbH has to notify the Finanzamt of its founding within one month {{ao|GmbH Gründung notify within one month}}, and the Fragebogen zur steuerlichen Erfassung must be submitted electronically via ELSTER {{elster|Fragebogen Kapitalgesellschaft ELSTER where to find}}. As the company was founded about three weeks ago and nothing has been submitted yet, I've marked this as high priority for your adviser, who will confirm the exact deadline {{sop|escalation rules Fragebogen not submitted three weeks}}.
+Two things are time-sensitive. First, a newly opened business generally has to notify the Finanzamt within one month, for a GmbH via the Fragebogen zur steuerlichen Erfassung submitted electronically through ELSTER {{elster|core filing requirement one month questionnaire electronically}}. Since nothing has been submitted yet, I've flagged this for your adviser, who will confirm the exact timing {{sop|escalation rules Fragebogen not submitted three weeks}}. Second, with employees starting next month, payroll and social-security setup needs to start now – I'll come back to that in a moment.
 
 To complete your case, could you tell me:
 1. The exact company name and registered office (Sitz)?
@@ -149,27 +153,27 @@ To complete your case, could you tell me:
   {
     reply: `Thanks – noted: Nordlicht Digital GmbH, Hamburg, notarised on 2 September 2026, Handelsregister entry pending.
 
-Because you are both shareholder and managing director, your social-security status needs a proper assessment. That's something your adviser will look at personally, so I've flagged it rather than answering it here {{sop|managing director also shareholder social-security escalation}}.
+Because you are both shareholder and managing director, whether you are subject to statutory social insurance depends on the ownership and control structure {{sgb|managing shareholders statutory social insurance ownership control}}. Your adviser will assess that personally, so I've flagged it rather than answering it here {{sop|managing director also shareholder social-security escalation}}.
 
 Next, about your two employees:
 1. When exactly do they start, and are they full-time, part-time or Minijob?
 2. What is the planned gross monthly salary for each?
-3. Does the GmbH already have a Betriebsnummer from the Bundesagentur für Arbeit? It's needed before employees can be registered for social security {{sgb|Betriebsnummer Bundesagentur}}.`,
+3. Does the GmbH already have a Betriebsnummer? It is assigned through the Bundesagentur für Arbeit and needed for social-security reporting {{sgb|Betriebsnummer assigned Bundesagentur}}.`,
     caseFile: step2,
     grounding: "grounded",
     escalate: true,
   },
   {
-    reply: `Got it. With the first payroll in October and no Betriebsnummer yet, timing matters: the Betriebsnummer comes from the Bundesagentur für Arbeit and employees can only be registered once it exists {{sgb|Betriebsnummer registration employees Einzugsstelle}}. I've flagged this for your adviser {{sop|first payroll run due within 30 days Betriebsnummer}}. Once payroll runs, the GmbH will also file a Lohnsteuer-Anmeldung by the 10th day after each reporting period {{estg|Lohnsteuer-Anmeldung 10th day obligation}}; your adviser will set up the right period.
+    reply: `Got it. With the first payroll in October and no Betriebsnummer yet, I've marked payroll setup as time-critical for your adviser {{sop|first payroll run due within 30 days Betriebsnummer}}. Once payroll runs, the GmbH files a Lohnsteuer-Anmeldung and pays the withheld wage tax by the 10th day after each reporting period {{estg|filing and payment deadline 10th day}}; your adviser will set up the right period.
 
-On bookkeeping: a GmbH has to keep proper books from the start {{hgb|obligation to keep books merchant}}. Since you use Lexoffice, your adviser will discuss whether you keep booking there and send us a DATEV export, or whether we take over the bookkeeping {{datev|Lexoffice DATEV export third-party software}}.
+On bookkeeping: a GmbH is required to keep proper books {{hgb|obligation to keep books merchant}}. Since you use Lexoffice, your adviser will agree with you how your receipts and bank data reach us {{sop|bookkeeping software bank account document flow}}.
 
-To finish the intake, please upload:
+To finish the intake, please upload these using the area below the chat:
 1. Articles of association (notarielle Urkunde)
 2. The notary's Handelsregister filing confirmation
 3. Shareholder list (Gesellschafterliste)
 4. Proof of share capital payment
-{{sop|required documents articles of association register extract shareholder list}}`,
+Employment contracts and employee data sheets can follow later {{sop|required documents articles of association register extract shareholder list}}.`,
     caseFile: step3,
     grounding: "grounded",
     escalate: true,
@@ -256,50 +260,50 @@ const OFFLINE_EMAIL = `Subject: Your new client case – Nordlicht Digital GmbH
 
 Dear client,
 
-thank you for choosing Muster & Partner Steuerberatung and for the information you've provided so far.
-
-We have received:
-1. Articles of association
-2. The notary's Handelsregister filing confirmation
-3. Shareholder list
+Thank you for contacting Muster & Partner Steuerberatung. We have received your articles of association, the notary's Handelsregister filing confirmation and your shareholder list.
 
 To complete your file, please send us:
 1. Proof of share capital payment (bank statement)
 2. A copy of your ID as managing director
-3. Confirmation of the transparency register entry
+3. Your transparency register confirmation
 4. Your trade registration (Gewerbeanmeldung), if applicable
-5. For each employee: employment contract, completed employee data sheet, tax ID and social security number
+5. For each employee: employment contract, employee data sheet, tax ID and social security number
 
-We still need a few details from you:
+We also still need:
 1. Expected turnover for 2026 and 2027
-2. Business purpose and start of operations
-3. Your business bank account and whether Lexoffice's DATEV export is set up
+2. Your business purpose and start of operations
+3. Your business bank account details
 4. Each employee's health insurer
 
-Because your company was founded recently and your first payroll is due on 1 October, your case has been assigned high priority. An adviser will contact you shortly about the tax registration with the Finanzamt and the Betriebsnummer for your employees, and will send you our engagement letter and power of attorney.
+Because your company was founded recently and your first payroll is due on 1 October, we have given your case high priority. An adviser will contact you shortly about the tax registration and the Betriebsnummer, and will send you our engagement letter and power of attorney.
 
 Kind regards
 Your team at Muster & Partner Steuerberatung`;
 
-export async function offlineSummary(caseFile: CaseFile, uploads: UploadedDoc[], sourcesUsed: SummaryResponse["citations"]): Promise<SummaryResponse> {
+export async function offlineSummary(
+  caseId: string,
+  caseFile: CaseFile,
+  uploads: UploadedDoc[],
+  sourcesUsed: SummaryResponse["citations"],
+): Promise<SummaryResponse> {
   const { text: briefing, passages } = await resolvePlaceholders(
-    `New GmbH (NG-01, tags BK/PR) founded ~3 weeks ago with no tax registration yet; the Fragebogen zur steuerlichen Erfassung is due within one month of the reportable event {{ao|within one month Fragebogen electronic}} and must go via ELSTER {{elster|Fragebogen Kapitalgesellschaft legal basis}}. Two employees start 1 October but there is no Betriebsnummer {{sgb|Betriebsnummer}}. The sole shareholder is also managing director, which triggers a social-security status check under our SOP {{sop|escalation rules managing director shareholder}}. Deadlines rely on starter notes – verify against the statute.`,
+    `Newly founded GmbH (notarised 2 Sept 2026, HR entry pending) needing bookkeeping, payroll and tax registration. The Fragebogen zur steuerlichen Erfassung has not been submitted; a new business generally has to notify the Finanzamt within one month, electronically via ELSTER {{elster|core filing requirement one month questionnaire electronically}} – the adviser should confirm when the period started for this company. Two employees start 1 October and there is no Betriebsnummer yet, which is needed for social-security reporting {{sgb|Betriebsnummer assigned Bundesagentur}}. The sole shareholder is also managing director, so social-security status needs an adviser assessment {{sop|escalation rules managing director shareholder}}. The client books in Lexoffice; this handover is structured for transfer into the firm's DATEV workflow {{datev|structured information transferred into the firm's DATEV environment}}.`,
   );
   const nextActions = [
-    "Confirm the registration deadline and submit the Fragebogen zur steuerlichen Erfassung via ELSTER.",
-    "Request the Betriebsnummer from the Bundesagentur für Arbeit before the October payroll.",
-    "Assess the managing director's social-security status.",
-    "Agree the bookkeeping set-up (Lexoffice + DATEV export vs. firm bookkeeping).",
-    "Send engagement letter and Vollmacht (D11).",
+    "Confirm timing and submit the Fragebogen zur steuerlichen Erfassung via ELSTER.",
+    "Arrange the Betriebsnummer before the 1 October payroll and set up payroll.",
+    "Assess the managing shareholder's social-security status.",
+    "Agree the bookkeeping set-up and document flow from Lexoffice.",
+    "Create the prospect in DATEV, file this handover in DATEV DMS, and send engagement letter and Vollmacht (D11).",
   ];
   const briefingCitations = toCitations(passages, passages.map((p) => p.ref));
   return {
     summary: composeSummary({
+      caseId,
       caseFile,
       uploads,
       briefing,
       nextActions,
-      email: OFFLINE_EMAIL,
       sources: sourcesUsed,
       briefingCitations,
       generatedAt: new Date().toISOString().slice(0, 16).replace("T", " "),
